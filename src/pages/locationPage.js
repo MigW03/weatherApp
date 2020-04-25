@@ -1,9 +1,10 @@
 import React, {useState, useEffect}from 'react';
-import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity, PermissionsAndroid} from 'react-native';
+import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity} from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome'
 import LinearGradient from 'react-native-linear-gradient'
-import GeoLocation from '@react-native-community/geolocation'
+import GeoLocation from 'react-native-geolocation-service'
+import GeoPosition from '@react-native-community/geolocation'
 import PreLoadedData from './preLoadedData'
 
 export default function weatherApp({navigation}) {
@@ -15,37 +16,56 @@ export default function weatherApp({navigation}) {
   const [sunset, setSunset] = useState('')
   const [pressure, setPressure] = useState('')
   const [humidity, setHumidity] = useState('')
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
+  const [latitude, setLatitude] = useState(null)
+  const [longitude, setLongitude] = useState(null)
 
 
-  useEffect(() => {    
+  function fetchData(){
+    fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=78b37a4e8794016f605c0479c504f232`)
+    .then(response => response.json())
+    .then(json => {
+      setCityName(json.name)
+      setTemperature((Number(json.main.temp) - 273).toFixed(0))
+      setFeelsLike((Number(json.main.feels_like) - 273).toFixed(0))
+      setPressure(json.main.pressure)
+      setHumidity(json.main.humidity)
+      setSunrise(Number(json.sys.sunrise))
+      setSunset(Number(json.sys.sunset))
 
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+      if(json.name){
+        setDataIsLoaded(true)
+      }
+      else{
+        Alert.alert('Cadê você?', 'Infelizmente não foi possivel carregar os dados da sua localização, tente pesquisar o nome da cidade onde está na página inicial.')
+        navigation.navigate('MainPage')
+      }
+    })
+    .catch(() => {
+      Alert.alert('Sem conexão', 'Certifique-se que seu aparelho está conectado à rede e reinicie o aplicativo!')
+      navigation.navigate('MainPage')
+    })
+  }
 
+  useEffect(() => {
 
-    fetch('http://api.openweathermap.org/data/2.5/weather?lat=38.72&lon=-9.13&appid=78b37a4e8794016f605c0479c504f232')
-      .then(response => response.json())
-      .then(json => {
-        setCityName(json.name)
-        setTemperature((Number(json.main.temp) - 273).toFixed(0))
-        setFeelsLike((Number(json.main.feels_like) - 273).toFixed(0))
-        setPressure(json.main.pressure)
-        setHumidity(json.main.humidity)
-        setSunrise(Number(json.sys.sunrise))
-        setSunset(Number(json.sys.sunset))
+    GeoLocation.getCurrentPosition(
+      position => {
+        setLatitude(Number(position.coords.altitude))
+        setLongitude(Number(position.coords.longitude))
+        fetchData()
+      },
+      () => GeoPosition.getCurrentPosition(
+        (backupPosition) => {
+          setLatitude(Number(backupPosition.coords.latitude))
+          setLongitude(Number(backupPosition.coords.longitude))
+        },
+        () => navigation.navigate('MainPage'),
+        {timeout: 5000, enableHighAccuracy: true}
+      ),
+      {timeout: 5000, enableHighAccuracy: true}
+    )
 
-        if(json.name){
-          setDataIsLoaded(true)
-        }
-        else{
-          Alert.alert('Cadê você?', 'Infelizmente não foi possivel carregar os dados da sua localização, tente pesquisar o nome da cidade onde está na página inicial.')
-          navigation.navigate('MainPage')
-        }
-      })
-      .catch(() => {
-        Alert.alert('Sem conexão', 'Certifique-se que seu aparelho está conectado à rede e reinicie o aplicativo!')
-      })
+    
   }, [])
 
   if(dataIsLoaded == true){
