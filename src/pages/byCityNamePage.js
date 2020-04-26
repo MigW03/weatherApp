@@ -3,8 +3,6 @@ import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity} from 'react
 
 import Icon from 'react-native-vector-icons/FontAwesome'
 import LinearGradient from 'react-native-linear-gradient'
-import GeoLocation from 'react-native-geolocation-service'
-import GeoPosition from '@react-native-community/geolocation'
 import PreLoadedData from './preLoadedData'
 
 export default function weatherApp({route, navigation}) {
@@ -16,15 +14,16 @@ export default function weatherApp({route, navigation}) {
   const [sunset, setSunset] = useState('')
   const [pressure, setPressure] = useState('')
   const [humidity, setHumidity] = useState('')
-  const {latitude} = route.params
-  const {longitude} = route.params
+  const [latitude, setLatitude] = useState(null)
+  const [longitude, setLongitude] = useState(null)
+  const {cityToSearch} = route.params
 
 
   
   useEffect(() => {
-    fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=78b37a4e8794016f605c0479c504f232`)
-      .then(response => response.json())
-      .then(json => {
+    fetch(`http://api.openweathermap.org/data/2.5/weather?q=${cityToSearch}&appid=78b37a4e8794016f605c0479c504f232`)
+        .then(response => response.json())
+        .then(json => {
         setCityName(json.name)
         setTemperature((Number(json.main.temp) - 273).toFixed(0))
         setFeelsLike((Number(json.main.feels_like) - 273).toFixed(0))
@@ -32,25 +31,26 @@ export default function weatherApp({route, navigation}) {
         setHumidity(json.main.humidity)
         setSunrise(Number(json.sys.sunrise))
         setSunset(Number(json.sys.sunset))
-  
-      if(json.name){
+        setLatitude(json.coord.lat)
+        setLongitude(json.coord.lon)
+
+        if(json.name){
         setDataIsLoaded(true)
-      }
-      else{
+        }
+        else{
         Alert.alert('Cadê você?', 'Infelizmente não foi possivel carregar os dados da sua localização, tente pesquisar o nome da cidade onde está na página inicial.')
         navigation.navigate('MainPage')
-      }
+        }
     })
     .catch(() => {
-      Alert.alert('Sem conexão', 'Certifique-se que seu aparelho está conectado à rede e tente novamente!')
+        Alert.alert('Sem conexão', 'Certifique-se que seu aparelho está conectado à rede e tente novamente!')
 
-      navigation.navigate('MainPage')
+        navigation.navigate('MainPage')
     })
-    
   }, [])
 
   function showCoords(){
-    Alert.alert('Suas coordenadas', `Latitude: ${latitude},\nLongitude: ${longitude}`)
+      Alert.alert(`Coordenadas em ${cityName}`, `Latitude: ${latitude}\nLongitude: ${longitude}`)
   }
 
   if(dataIsLoaded == true){
@@ -64,7 +64,6 @@ export default function weatherApp({route, navigation}) {
       >
         <StatusBar backgroundColor='#0066ff'/>
         <View style={styles.city}>
-            <Icon name='map-marker' size={26} color='#cc5200' style={styles.locationIcon}/>
             <Text style={styles.cityName} onPress={showCoords}>{cityName}</Text>
         </View>
         <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.navigate('MainPage')}>

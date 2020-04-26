@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity,TextInput, PermissionsAndroid, StatusBar, Alert, AsyncStorage, Modal} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity,TextInput, PermissionsAndroid, StatusBar, FlatList, Alert, AsyncStorage, Modal, KeyboardAvoidingView, ToastAndroid} from 'react-native';
 
 import LinearGradient from 'react-native-linear-gradient'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { FlatList } from 'react-native-gesture-handler';
+import GeoPosition from '@react-native-community/geolocation'
+import GeoLocation from 'react-native-geolocation-service'
 import ShortCut from '../components/shortcutItem'
 
 
@@ -14,6 +15,8 @@ export default function mainPage({navigation}) {
   const [shortCuts, setShortCuts] = useState(getShortCuts)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCity, setModalCity] = useState('')
+  const [lat, setLat] = useState(null)
+  const [long, setLong] = useState(null)
 
   async function getShortCuts(){
     try {
@@ -25,13 +28,29 @@ export default function mainPage({navigation}) {
     }
   }
 
-  async function checkForPermission(){
+  async function goToLocation(){
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
 
     const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
 
+    await GeoLocation.getCurrentPosition(
+      position => {
+        setLat(Number(position.coords.latitude))
+        setLong(Number(position.coords.longitude))
+      },
+      () => GeoPosition.getCurrentPosition(
+        backupPosition => {
+          setLat(Number(backupPosition.coords.latitude))
+          setLong(Number(backupPosition.coords.longitude))
+        },
+        () => {navigation.navigate('MainPage')},
+        {timeout: 5000, enableHighAccuracy: true}
+      ),
+      {timeout: 5000, enableHighAccuracy: true}
+    )
+    
     if(granted){
-      navigation.navigate('LocationPage')
+      navigation.navigate('LocationPage', {latitude: lat, longitude: long})
     }
     else{
       alert('Precisa de permissao para essa funcao')
@@ -60,6 +79,14 @@ export default function mainPage({navigation}) {
     }
   }
 
+  function deleteShortCut(key){
+    let newShortcuts = shortCuts.filter(item => item.key !== key)
+
+    setShortCuts(newShortcuts)
+    ToastAndroid.show('Atalho removido', ToastAndroid.SHORT)
+    saveShortcuts(newShortcuts)
+  }
+
   async function saveShortcuts(dataToSave){
     try {
       await AsyncStorage.setItem('savedShortcuts', JSON.stringify(dataToSave))
@@ -86,27 +113,40 @@ export default function mainPage({navigation}) {
           value = {inputData}
           onChangeText = {text => setInputData(text)}
         />
-        <TouchableOpacity style={styles.searchIcon}>
+        <TouchableOpacity style={styles.searchIcon} onPress={() => {
+            navigation.navigate('ByCityNamePage', {cityToSearch: inputData})
+            setInputData('')
+          }
+        }>
           <Icon name='search' size={30} color='#222'/>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.locationTouch} onPress={checkForPermission}>
+      <TouchableOpacity style={styles.locationTouch} onPress={goToLocation}>
         <Text>Sua localização</Text>
         <Icon name='location-searching' size={24} color='#323232'/>
       </TouchableOpacity>
 
-      <View style={styles.shortCuts}>
+      <View style={styles.shortCutsView}>
         <FlatList
-        style={{marginBottom: 25}}
+          showsVerticalScrollIndicator = {false}
           data = {shortCuts}
           renderItem = {({item, index}) => 
-            <ShortCut name={item.cityName}/>
+            <ShortCut
+              name={item.cityName}
+              mainAction = {() => navigation.navigate('ByCityNamePage', {cityToSearch: item.cityName})}
+              deleteAction = {() => deleteShortCut(item.key)}
+            />
           }
+          ListFooterComponent = {() => 
+            <View style={{height: 70}}>
+              <TouchableOpacity style={[styles.addShortCutButton, {display: shortCuts.length < 7 ? 'flex' : 'none'}]} onPress={() => setModalOpen(true)}>
+                <Text style={styles.addShortCutText}>Adicionar atalho</Text>
+              </TouchableOpacity>
+            </View>
+          }
+          ListFooterComponentStyle = {{marginBottom: 30}}
         />   
-        <TouchableOpacity style={styles.addShortCutButton} onPress={() => setModalOpen(true)}>
-          <Text style={styles.addShortCutText}>Adicionar atalho</Text>
-        </TouchableOpacity>
       </View>
       <Modal
         visible = {modalOpen}
@@ -115,7 +155,10 @@ export default function mainPage({navigation}) {
         statusBarTranslucent = {true}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalPrompt}>
+          <KeyboardAvoidingView
+            behavior = 'position'
+            contentContainerStyle = {styles.modalPrompt}
+          >
             <TextInput
               style = {styles.modalInput}
               placeholder = 'Nome da cidade'
@@ -125,7 +168,7 @@ export default function mainPage({navigation}) {
             <TouchableOpacity style={styles.modalButton} onPress={addShortCut}>
               <Text style={styles.saveShortCutText}>Salvar atalho</Text>
             </TouchableOpacity>
-          </View>
+          </KeyboardAvoidingView>
 
           <TouchableOpacity style={styles.cancelShortCutButton} onPress={() => {setModalCity(''); setModalOpen(false)}}>
             <Text style={styles.cancelShortCutText}>Cancelar</Text>
@@ -176,10 +219,10 @@ const styles = StyleSheet.create({
       alignSelf: 'center'
     },
     addShortCutButton: {
-      display: displayButton,
       alignSelf: 'center',
       backgroundColor: 'orange',
       padding: 12,
+      marginTop: 28,
       margin: 6,
       borderRadius: 12
     },
@@ -237,5 +280,8 @@ const styles = StyleSheet.create({
       fontSize: 20,
       fontWeight: 'bold',
       color: '#eeeeee',
+    },
+    shortCutsView: {
+      flex: 1
     }
 })
