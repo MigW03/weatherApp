@@ -2,9 +2,8 @@ import React, {useState, useEffect}from 'react';
 import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity} from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome'
+import AwesomeIcon5 from 'react-native-vector-icons/FontAwesome5'
 import LinearGradient from 'react-native-linear-gradient'
-import GeoLocation from 'react-native-geolocation-service'
-import GeoPosition from '@react-native-community/geolocation'
 import PreLoadedData from './preLoadedData'
 
 export default function weatherApp({route, navigation}) {
@@ -16,6 +15,8 @@ export default function weatherApp({route, navigation}) {
   const [sunset, setSunset] = useState('')
   const [pressure, setPressure] = useState('')
   const [humidity, setHumidity] = useState('')
+  const [minTemp, setMinTemp] = useState('')
+  const [maxTemp, setMaxTemp] = useState('')
   const {latitude} = route.params
   const {longitude} = route.params
 
@@ -32,6 +33,8 @@ export default function weatherApp({route, navigation}) {
         setHumidity(json.main.humidity)
         setSunrise(Number(json.sys.sunrise))
         setSunset(Number(json.sys.sunset))
+        setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
+        setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
   
       if(json.name){
         setDataIsLoaded(true)
@@ -89,6 +92,17 @@ export default function weatherApp({route, navigation}) {
           </View>
 
           <View style={styles.extraInfo}>
+            <View style={styles.extraTempInfo}>
+              <View style={styles.maxTemp}>
+                <AwesomeIcon5 name='temperature-high' size={28} color='red'/>
+                <Text style={styles.extraTempText}>{maxTemp}ºC</Text>
+              </View>
+              
+              <View style={styles.minTemp}>
+                <AwesomeIcon5 name='temperature-low' size={28} color='blue'/>
+                <Text style={styles.extraTempText}>{minTemp}ºC</Text>
+              </View>
+            </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Pressão: </Text>
               <Text style={styles.infoValue}>{pressure}hpa</Text>
@@ -221,5 +235,26 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     color: '#656565'
+  },
+  extraTempInfo: {
+    flexDirection: 'row',
+    marginVertical: 20,
+  },
+  maxTemp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  minTemp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  extraTempText: {
+    fontSize: 26,
+    color: '#656565',
+    fontWeight: 'bold'
   }
 })

@@ -1,7 +1,8 @@
 import React, {useState, useEffect}from 'react';
-import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity, ScrollView} from 'react-native';
 
-import Icon from 'react-native-vector-icons/FontAwesome'
+import AwesomeIcon from 'react-native-vector-icons/FontAwesome'
+import AwesomeIcon5 from 'react-native-vector-icons/FontAwesome5'
 import LinearGradient from 'react-native-linear-gradient'
 import PreLoadedData from './preLoadedData'
 
@@ -16,6 +17,8 @@ export default function weatherApp({route, navigation}) {
   const [humidity, setHumidity] = useState('')
   const [latitude, setLatitude] = useState(null)
   const [longitude, setLongitude] = useState(null)
+  const [minTemp, setMinTemp] = useState('')
+  const [maxTemp, setMaxTemp] = useState('')
   const {cityToSearch} = route.params
 
 
@@ -33,6 +36,8 @@ export default function weatherApp({route, navigation}) {
         setSunset(Number(json.sys.sunset))
         setLatitude(json.coord.lat)
         setLongitude(json.coord.lon)
+        setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
+        setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
 
         if(json.name){
         setDataIsLoaded(true)
@@ -67,7 +72,7 @@ export default function weatherApp({route, navigation}) {
             <Text style={styles.cityName} onPress={showCoords}>{cityName}</Text>
         </View>
         <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.navigate('MainPage')}>
-          <Icon name='arrow-left' size={24} color='#ddeedd'/>
+          <AwesomeIcon name='arrow-left' size={24} color='#ddeedd'/>
         </TouchableOpacity>
 
         <View style={styles.content}>
@@ -78,7 +83,7 @@ export default function weatherApp({route, navigation}) {
                 <Text style={styles.degreeSymbol}>ºC</Text>
               </View>
               <View style={styles.weatherStateImage}>
-                <Icon name='sun-o' size={67} color='orange'/>
+                <AwesomeIcon name='sun-o' size={67} color='orange'/>
               </View>
             </View>
 
@@ -88,6 +93,17 @@ export default function weatherApp({route, navigation}) {
           </View>
 
           <View style={styles.extraInfo}>
+            <View style={styles.extraTempInfo}>
+              <View style={styles.maxTemp}>
+                <AwesomeIcon5 name='temperature-high' size={28} color='#ff3333'/>
+                <Text style={styles.extraTempText}>{maxTemp}ºC</Text>
+              </View>
+              
+              <View style={styles.minTemp}>
+                <AwesomeIcon5 name='temperature-low' size={28} color='#0080ff'/>
+                <Text style={styles.extraTempText}>{minTemp}ºC</Text>
+              </View>
+            </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Pressão: </Text>
               <Text style={styles.infoValue}>{pressure}hpa</Text>
@@ -209,7 +225,7 @@ const styles = StyleSheet.create({
   infoLine: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   infoTitle: {
     fontSize: 20,
@@ -220,5 +236,26 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     color: '#656565'
+  },
+  extraTempInfo: {
+    flexDirection: 'row',
+    marginVertical: 20,
+  },
+  maxTemp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  minTemp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  extraTempText: {
+    fontSize: 26,
+    color: '#656565',
+    fontWeight: 'bold'
   }
 })

@@ -10,7 +10,7 @@ export default function shortcutItem(props) {
             <Text style={styles.cityName}>{props.name}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconView} onPress={props.deleteAction}>
-          <Icon name='trash-2' size={24} color='red'/>
+          <Icon name='trash-2' size={24} color='#ffffffdd'/>
         </TouchableOpacity>
     </View>
   );

@@ -220,15 +220,15 @@ const styles = StyleSheet.create({
     },
     addShortCutButton: {
       alignSelf: 'center',
-      backgroundColor: 'orange',
+      backgroundColor: '#ff9900',
       padding: 12,
       marginTop: 28,
       margin: 6,
       borderRadius: 12
     },
     addShortCutText: {
-      color: '#eeeeee',
-      fontSize: 18,
+      color: '#fff',
+      fontSize: 20,
       fontWeight: 'bold'
     },
     modalContainer: {
