@@ -9,6 +9,7 @@ import PreLoadedData from './preLoadedData'
 export default function weatherApp({route, navigation}) {
   const [dataIsLoaded, setDataIsLoaded] = useState(false)
   const [cityName, setCityName] = useState('')
+  const [country, setCountry] = useState('')
   const [temperature, setTemperature] = useState('')
   const [feelsLike, setFeelsLike] = useState('')
   const [sunrise, setSunrise] = useState('')
@@ -27,25 +28,25 @@ export default function weatherApp({route, navigation}) {
     fetch(`http://api.openweathermap.org/data/2.5/weather?q=${cityToSearch}&appid=78b37a4e8794016f605c0479c504f232`)
         .then(response => response.json())
         .then(json => {
-        setCityName(json.name)
-        setTemperature((Number(json.main.temp) - 273).toFixed(0))
-        setFeelsLike((Number(json.main.feels_like) - 273).toFixed(0))
-        setPressure(json.main.pressure)
-        setHumidity(json.main.humidity)
-        setSunrise(Number(json.sys.sunrise))
-        setSunset(Number(json.sys.sunset))
-        setLatitude(json.coord.lat)
-        setLongitude(json.coord.lon)
-        setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
-        setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
+          if(json.message){
+            Alert.alert('Tente novamente', 'A cidade que você procurou não foi encontrada, verifique se você digitou o nome da cidade corretamente!')
+            navigation.navigate('MainPage')
+          }else{
+            setCityName(json.name)
+            setCountry(json.sys.country)
+            setTemperature((Number(json.main.temp) - 273).toFixed(0))
+            setFeelsLike((Number(json.main.feels_like) - 273).toFixed(0))
+            setPressure(json.main.pressure)
+            setHumidity(json.main.humidity)
+            setSunrise(Number(json.sys.sunrise))
+            setSunset(Number(json.sys.sunset))
+            setLatitude(json.coord.lat)
+            setLongitude(json.coord.lon)
+            setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
+            setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
 
-        if(json.name){
-        setDataIsLoaded(true)
-        }
-        else{
-        Alert.alert('Cadê você?', 'Infelizmente não foi possivel carregar os dados da sua localização, tente pesquisar o nome da cidade onde está na página inicial.')
-        navigation.navigate('MainPage')
-        }
+            setDataIsLoaded(true)
+          }
     })
     .catch(() => {
         Alert.alert('Sem conexão', 'Certifique-se que seu aparelho está conectado à rede e tente novamente!')
@@ -69,7 +70,7 @@ export default function weatherApp({route, navigation}) {
       >
         <StatusBar backgroundColor='#0066ff'/>
         <View style={styles.city}>
-            <Text style={styles.cityName} onPress={showCoords}>{cityName}</Text>
+            <Text style={styles.cityName} onPress={showCoords}>{cityName} / {country}</Text>
         </View>
         <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.navigate('MainPage')}>
           <AwesomeIcon name='arrow-left' size={24} color='#ddeedd'/>
