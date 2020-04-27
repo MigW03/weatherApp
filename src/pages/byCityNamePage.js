@@ -1,6 +1,8 @@
 import React, {useState, useEffect}from 'react';
 import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity, ScrollView} from 'react-native';
 
+import Icon from '../components/icon'
+
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome'
 import AwesomeIcon5 from 'react-native-vector-icons/FontAwesome5'
 import LinearGradient from 'react-native-linear-gradient'
@@ -20,6 +22,7 @@ export default function weatherApp({route, navigation}) {
   const [longitude, setLongitude] = useState(null)
   const [minTemp, setMinTemp] = useState('')
   const [maxTemp, setMaxTemp] = useState('')
+  const [iconCode, setIconCode] = useState('')
   const {cityToSearch} = route.params
 
 
@@ -44,6 +47,7 @@ export default function weatherApp({route, navigation}) {
             setLongitude(json.coord.lon)
             setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
             setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
+            setIconCode(json.weather[0].icon)
 
             setDataIsLoaded(true)
           }
@@ -84,7 +88,7 @@ export default function weatherApp({route, navigation}) {
                 <Text style={styles.degreeSymbol}>ºC</Text>
               </View>
               <View style={styles.weatherStateImage}>
-                <AwesomeIcon name='sun-o' size={67} color='orange'/>
+                <Icon code={iconCode}/>
               </View>
             </View>
 

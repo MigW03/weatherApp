@@ -109,6 +109,7 @@ export default function mainPage({navigation}) {
       <View style={styles.searchBar}>
         <TextInput
           placeholder = 'Nome da cidade'
+          returnKeyType = "search"
           style = {styles.input}
           value = {inputData}
           onChangeText = {text => setInputData(text)}
