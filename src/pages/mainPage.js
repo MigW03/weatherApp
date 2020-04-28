@@ -5,10 +5,8 @@ import LinearGradient from 'react-native-linear-gradient'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import GeoPosition from '@react-native-community/geolocation'
 import GeoLocation from 'react-native-geolocation-service'
+import * as Animatable from 'react-native-animatable'
 import ShortCut from '../components/shortcutItem'
-
-
-var displayButton = 'flex'
 
 export default function mainPage({navigation}) {
   const [inputData, setInputData] = useState('')
@@ -64,6 +62,7 @@ export default function mainPage({navigation}) {
       if(modalCity){
         let newShortCut = {
           cityName: modalCity,
+          animation: 1000 + (shortCuts.length * 200),
           key: modalCity + Math.random().toString
         }
 
@@ -133,11 +132,16 @@ export default function mainPage({navigation}) {
           showsVerticalScrollIndicator = {false}
           data = {shortCuts}
           renderItem = {({item, index}) => 
-            <ShortCut
-              name={item.cityName}
-              mainAction = {() => navigation.navigate('ByCityNamePage', {cityToSearch: item.cityName})}
-              deleteAction = {() => deleteShortCut(item.key)}
-            />
+            <Animatable.View
+              animation = 'bounceInRight'
+              duration = {item.animation}
+            >
+              <ShortCut
+                name={item.cityName}
+                mainAction = {() => navigation.navigate('ByCityNamePage', {cityToSearch: item.cityName})}
+                deleteAction = {() => deleteShortCut(item.key)}
+              />
+            </Animatable.View>
           }
           ListFooterComponent = {() => 
             <View style={{height: 70}}>
