@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   },
   cityName: {
     fontSize: 28,
+    maxWidth: '70%',
     color: '#ddeedd',
     fontWeight: 'bold',
     alignSelf: 'center'

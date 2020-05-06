@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity,TextInput, PermissionsAndroid, StatusBar, FlatList, Alert, AsyncStorage, Modal, KeyboardAvoidingView, ToastAndroid} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity,TextInput, PermissionsAndroid, StatusBar, FlatList, Alert, AsyncStorage, Modal, KeyboardAvoidingView, ToastAndroid, Keyboard} from 'react-native';
 
 import LinearGradient from 'react-native-linear-gradient'
 import Icon from 'react-native-vector-icons/MaterialIcons'
@@ -109,6 +109,11 @@ export default function mainPage({navigation}) {
         <TextInput
           placeholder = 'Nome da cidade'
           returnKeyType = "search"
+          onSubmitEditing = {() => {
+            Keyboard.dismiss()
+            navigation.navigate('ByCityNamePage', {cityToSearch: inputData})
+            setInputData('')
+          }}
           style = {styles.input}
           value = {inputData}
           onChangeText = {text => setInputData(text)}
@@ -167,6 +172,11 @@ export default function mainPage({navigation}) {
             <TextInput
               style = {styles.modalInput}
               placeholder = 'Nome da cidade'
+              returnKeyType = 'done'
+              onSubmitEditing = {() => {
+                Keyboard.dismiss()
+                addShortCut()
+              }}
               value = {modalCity}
               onChangeText = {text => setModalCity(text)}
             />
