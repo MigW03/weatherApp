@@ -28,7 +28,7 @@ export default function weatherApp({route, navigation}) {
 
   
   useEffect(() => {
-    fetch(`http://api.openweathermap.org/data/2.5/weather?q=${cityToSearch}&appid=78b37a4e8794016f605c0479c504f232`)
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityToSearch}&appid=78b37a4e8794016f605c0479c504f232`)
         .then(response => response.json())
         .then(json => {
           if(json.message){
