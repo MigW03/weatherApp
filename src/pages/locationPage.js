@@ -1,7 +1,8 @@
 import React, {useState, useEffect}from 'react';
 import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity} from 'react-native';
 
-import Icon from 'react-native-vector-icons/FontAwesome'
+import Icon from '../components/icon'
+import AwesomeIcon from 'react-native-vector-icons/FontAwesome'
 import AwesomeIcon5 from 'react-native-vector-icons/FontAwesome5'
 import LinearGradient from 'react-native-linear-gradient'
 import PreLoadedData from './preLoadedData'
@@ -17,6 +18,7 @@ export default function weatherApp({route, navigation}) {
   const [humidity, setHumidity] = useState('')
   const [minTemp, setMinTemp] = useState('')
   const [maxTemp, setMaxTemp] = useState('')
+  const [iconCode, setIconCode] = useState('')
   const {latitude} = route.params
   const {longitude} = route.params
 
@@ -35,6 +37,7 @@ export default function weatherApp({route, navigation}) {
         setSunset(Number(json.sys.sunset))
         setMinTemp((Number(json.main.temp_min) - 273).toFixed(0))
         setMaxTemp((Number(json.main.temp_max) - 273).toFixed(0))
+        setIconCode(json.weather[0].icon)
   
       if(json.name){
         setDataIsLoaded(true)
@@ -56,6 +59,16 @@ export default function weatherApp({route, navigation}) {
     Alert.alert('Suas coordenadas', `Latitude: ${latitude},\nLongitude: ${longitude}`)
   }
 
+  function formatMinutes(dateToFormat){
+      let minutes = Number(new Date(1000 * dateToFormat).getMinutes())
+
+      if (minutes < 10){
+        return `0${minutes}`
+      }else{
+        return minutes
+      }
+  }
+
   if(dataIsLoaded == true){
     return (
       <LinearGradient
@@ -67,11 +80,11 @@ export default function weatherApp({route, navigation}) {
       >
         <StatusBar backgroundColor='#0066ff'/>
         <View style={styles.city}>
-            <Icon name='map-marker' size={26} color='#cc5200' style={styles.locationIcon}/>
+            <AwesomeIcon name='map-marker' size={26} color='#cc5200' style={styles.locationIcon}/>
             <Text style={styles.cityName} onPress={showCoords}>{cityName}</Text>
         </View>
         <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.navigate('MainPage')}>
-          <Icon name='arrow-left' size={24} color='#ddeedd'/>
+          <AwesomeIcon name='arrow-left' size={24} color='#ddeedd'/>
         </TouchableOpacity>
 
         <View style={styles.content}>
@@ -82,7 +95,7 @@ export default function weatherApp({route, navigation}) {
                 <Text style={styles.degreeSymbol}>ºC</Text>
               </View>
               <View style={styles.weatherStateImage}>
-                <Icon name='sun-o' size={67} color='orange'/>
+                <Icon code={iconCode}/>
               </View>
             </View>
 
@@ -113,11 +126,11 @@ export default function weatherApp({route, navigation}) {
             </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Nascer do sol: </Text>
-              <Text style={styles.infoValue}>{new Date(sunrise * 1000).getHours()}:{new Date(sunrise * 1000).getMinutes()}</Text>
+              <Text style={styles.infoValue}>{new Date(sunrise * 1000).getHours()}:{formatMinutes(sunrise)}</Text>
             </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Pôr do sol: </Text>
-              <Text style={styles.infoValue}>{new Date(sunset * 1000).getHours()}:{new Date(sunset * 1000).getMinutes()}</Text>
+              <Text style={styles.infoValue}>{new Date(sunset * 1000).getHours()}:{formatMinutes(sunset)}</Text>
             </View>
           </View>
         </View>

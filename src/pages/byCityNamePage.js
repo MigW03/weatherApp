@@ -63,6 +63,16 @@ export default function weatherApp({route, navigation}) {
       Alert.alert(`Coordenadas em ${cityName}`, `Latitude: ${latitude}\nLongitude: ${longitude}`)
   }
 
+  function formatMinutes(dateToFormat){
+    let minutes = Number(new Date(1000 * dateToFormat).getMinutes())
+
+    if (minutes < 10){
+      return `0${minutes}`
+    }else{
+      return minutes
+    }
+  }
+
   if(dataIsLoaded == true){
     return (
       <LinearGradient
@@ -119,11 +129,11 @@ export default function weatherApp({route, navigation}) {
             </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Nascer do sol: </Text>
-              <Text style={styles.infoValue}>{new Date(sunrise * 1000).getHours()}:{new Date(sunrise * 1000).getMinutes()}</Text>
+              <Text style={styles.infoValue}>{new Date(sunrise * 1000).getHours()}:{formatMinutes(sunrise)}</Text>
             </View>
             <View style={styles.infoLine}>
               <Text style={styles.infoTitle}>Pôr do sol: </Text>
-              <Text style={styles.infoValue}>{new Date(sunset * 1000).getHours()}:{new Date(sunset * 1000).getMinutes()}</Text>
+              <Text style={styles.infoValue}>{new Date(sunset * 1000).getHours()}:{formatMinutes(sunset)}</Text>
             </View>
           </View>
         </View>

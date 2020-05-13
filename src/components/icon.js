@@ -43,9 +43,9 @@ export default function icon(props) {
             return <AwesomeIcon5 name='cloud' size={67} color='#838383'/>
 
         case '09d':
-            return <AwesomeIcon5 name='cloud-showers-rain' size={67} color='#323232'/>
+            return <AwesomeIcon5 name='cloud-showers-heavy' size={67} color='#323232'/>
         case '09n':
-            return <AwesomeIcon5 name='cloud-showers-rain' size={67} color='#323232'/>
+            return <AwesomeIcon5 name='cloud-showers-heavy' size={67} color='#323232'/>
 
         case '10d':
             return <AwesomeIcon5 name='cloud-rain' size={67} color='#999999'/>
